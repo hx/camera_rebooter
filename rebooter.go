@@ -63,7 +63,9 @@ func (r *Rebooter) init() (err error) {
 	return
 }
 
-func (r *Rebooter) setTimeToFuture() {
+const TimeFormat = "3:04pm on Monday 2 January"
+
+func (r *Rebooter) setNextScheduledTime() {
 	now := time.Now().In(r.Location)
 	year, month, day := now.Date()
 	next := time.Date(year, month, day, r.OnHour, r.OnMinute, 0, 0, r.Location)
@@ -72,7 +74,7 @@ func (r *Rebooter) setTimeToFuture() {
 	}
 	r.nextReboot = next
 	fmt.Printf("Next reboot will be at %s\n",
-		next.Format("3:04pm on Monday 2 January"),
+		next.Format(TimeFormat),
 	)
 }
 
@@ -80,8 +82,8 @@ func (r *Rebooter) Loop() (err error) {
 	if err = r.init(); err != nil {
 		return
 	}
+	r.setNextScheduledTime()
 	for {
-		r.setTimeToFuture()
 		for r.nextReboot.After(time.Now()) {
 			d := r.nextReboot.Sub(time.Now())
 			if d > time.Minute {
@@ -89,8 +91,14 @@ func (r *Rebooter) Loop() (err error) {
 			}
 			<-time.After(d)
 		}
-		if err = r.Reboot(); err != nil {
-			return
+		if err = r.Reboot(); err == nil {
+			r.setNextScheduledTime()
+		} else {
+			fmt.Printf("Error: %s\n", err)
+			r.nextReboot = time.Now().Add(time.Minute * 2)
+			fmt.Printf("Next retry will be at %s\n",
+				r.nextReboot.Format(TimeFormat),
+			)
 		}
 	}
 }
