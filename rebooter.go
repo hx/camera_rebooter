@@ -37,6 +37,7 @@ func (r *Rebooter) init() (err error) {
 				InsecureSkipVerify: true,
 			},
 		},
+		Timeout: 15 * time.Second,
 	}
 	r.authToken = ""
 	r.cameraID = ""
