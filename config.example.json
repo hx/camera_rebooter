@@ -1,0 +1,8 @@
+{
+  "address": "https://192.168.1.50:7443",
+  "username": "fred",
+  "password": "sshhh",
+  "camera_name": "Broken Camera",
+  "time": "02:00",
+  "location": "Australia/Sydney"
+}
