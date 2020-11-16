@@ -3,7 +3,6 @@ package main
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"io"
 	"net/http"
 	"time"
@@ -53,10 +52,10 @@ func (r *Rebooter) requestWithoutLogin(method, path string, body interface{}, re
 	startedAt := time.Now()
 	res, err := r.client.Do(req)
 	if err != nil {
-		fmt.Printf("[---] %s %s - %s\n", req.Method, req.URL, err)
+		r.Logger.Trace("[---] %s %s - %s", req.Method, req.URL, err)
 		return
 	}
-	fmt.Printf("[%d] %s %s (%s)\n", res.StatusCode, req.Method, req.URL, time.Now().Sub(startedAt))
+	r.Logger.Trace("[%d] %s %s (%s)", res.StatusCode, req.Method, req.URL, time.Now().Sub(startedAt))
 	if res.StatusCode >= 400 {
 		return &HTTPStatus{res.StatusCode, res.Status}
 	}

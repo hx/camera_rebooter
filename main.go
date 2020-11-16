@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"github.com/hx/logs"
 	"os"
 	"time"
 )
@@ -15,7 +16,9 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+	logs.DefaultTimeFormatter.Location = loc
 	r := &Rebooter{
+		Logger:   logs.NewStdoutLogger(logs.Verbose),
 		Config:   config,
 		Location: loc,
 	}

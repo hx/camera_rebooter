@@ -3,7 +3,7 @@ package main
 import (
 	"crypto/tls"
 	"errors"
-	"fmt"
+	"github.com/hx/logs"
 	"net/http"
 	"time"
 )
@@ -23,6 +23,8 @@ type Rebooter struct {
 	OnHour   int
 	OnMinute int
 	Location *time.Location
+
+	Logger *logs.Logger
 
 	cameraID   string
 	authToken  string
@@ -53,7 +55,7 @@ func (r *Rebooter) init() (err error) {
 
 	for _, cam := range bs.Cameras {
 		if cam.Name == r.CameraName {
-			fmt.Printf("Camera '%s' has ID %s\n", cam.Name, cam.ID)
+			r.Logger.Info("Camera '%s' has ID %s", cam.Name, cam.ID)
 			r.cameraID = cam.ID
 			break
 		}
@@ -74,7 +76,7 @@ func (r *Rebooter) setNextScheduledTime() {
 		next = next.AddDate(0, 0, 1)
 	}
 	r.nextReboot = next
-	fmt.Printf("Next reboot will be at %s\n",
+	r.Logger.Info("Next reboot will be at %s",
 		next.Format(TimeFormat),
 	)
 }
@@ -95,9 +97,9 @@ func (r *Rebooter) Loop() (err error) {
 		if err = r.Reboot(); err == nil {
 			r.setNextScheduledTime()
 		} else {
-			fmt.Printf("Error: %s\n", err)
+			r.Logger.Error(err.Error())
 			r.nextReboot = time.Now().Add(time.Minute * 2)
-			fmt.Printf("Next retry will be at %s\n",
+			r.Logger.Info("Next retry will be at %s",
 				r.nextReboot.Format(TimeFormat),
 			)
 		}
